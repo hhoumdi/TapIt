@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Settings Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-grad-1: #0f172a;
+            --bg-grad-2: #1e1b4b;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --input-bg: rgba(15, 23, 42, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+            min-height: 100vh;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        .dashboard-card {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 28px 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .toggle-box {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .toggle-box label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .btn-save {
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-card">
+        <div class="header">
+            <h1>Card Settings</h1>
+            <p style="font-size: 13px; color: var(--text-secondary);">Manage Direct Mode & Profile Links</p>
+        </div>
+
+        <form id="settingsForm">
+            <div class="toggle-box">
+                <div>
+                    <label>Auto-Redirect (Direct Mode)</label>
+                    <p style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Skip profile page and open link directly</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="enableAutoRedirect">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div id="targetGroup" class="form-group hidden">
+                <label>Direct Target Destination</label>
+                <select id="targetType" class="form-control">
+                    <option value="google_review">Google Review Link</option>
+                    <option value="website">Personal Website</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="custom_url">Custom URL</option>
+                </select>
+            </div>
+
+            <div id="customUrlGroup" class="form-group hidden">
+                <label>Custom URL Destination</label>
+                <input type="url" id="customUrl" class="form-control" placeholder="https://...">
+            </div>
+
+            <button type="submit" class="btn-save">Save Settings</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { db } from "./config.js";
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const cardId = urlParams.get('id');
+
+        const toggle = document.getElementById('enableAutoRedirect');
+        const targetGroup = document.getElementById('targetGroup');
+        const targetSelect = document.getElementById('targetType');
+        const customUrlGroup = document.getElementById('customUrlGroup');
+
+        toggle.addEventListener('change', () => {
+            if (toggle.checked) {
+                targetGroup.classList.remove('hidden');
+                checkCustomUrl();
+            } else {
+                targetGroup.classList.add('hidden');
+                customUrlGroup.classList.add('hidden');
+            }
+        });
+
+        targetSelect.addEventListener('change', checkCustomUrl);
+
+        function checkCustomUrl() {
+            if (targetSelect.value === 'custom_url') {
+                customUrlGroup.classList.remove('hidden');
+            } else {
+                customUrlGroup.classList.add('hidden');
+            }
+        }
+
+        async function loadConfig() {
+            if (!cardId) return;
+            const docRef = doc(db, "profiles", cardId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const cfg = data.redirect_config || {};
+
+                toggle.checked = !!cfg.enable_auto_redirect;
+                targetSelect.value = cfg.target_type || "google_review";
+                document.getElementById('customUrl').value = cfg.custom_url || "";
+
+                if (toggle.checked) {
+                    targetGroup.classList.remove('hidden');
+                    checkCustomUrl();
+                }
+            }
+        }
+
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!cardId) return;
+
+            try {
+                await updateDoc(doc(db, "profiles", cardId), {
+                    "redirect_config.enable_auto_redirect": toggle.checked,
+                    "redirect_config.target_type": targetSelect.value,
+                    "redirect_config.custom_url": document.getElementById('customUrl').value
+                });
+                alert("Settings Saved Successfully!");
+            } catch (err) {
+                console.error("Save Error:", err);
+                alert("Failed to save settings.");
+            }
+        });
+
+        loadConfig();
+    </script>
+</body>
+</html>

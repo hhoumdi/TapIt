@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Card - Smart NFC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-grad-1: #0f172a;
+            --bg-grad-2: #1e1b4b;
+            --accent-glow: #6366f1;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --btn-bg: rgba(255, 255, 255, 0.05);
+            --btn-hover: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+            min-height: 100vh;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 32px 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loader-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-glow);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .profile-header {
+            text-align: center;
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 16px auto;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .verified-badge {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: #38bdf8;
+            color: #0f172a;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            border: 2px solid #0f172a;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .profile-profession {
+            font-size: 14px;
+            color: #38bdf8;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .profile-bio {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 24px;
+            padding: 0 10px;
+        }
+
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--btn-bg);
+            border: 1px solid var(--card-border);
+            padding: 14px 18px;
+            border-radius: 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 14.5px;
+            font-weight: 600;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .action-btn:hover {
+            background: var(--btn-hover);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .action-btn-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .action-btn i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .btn-google { color: #fbbc05; }
+        .btn-website { color: #38bdf8; }
+        .btn-instagram { color: #e1306c; }
+        .btn-linkedin { color: #0a66c2; }
+        .btn-whatsapp { color: #25d366; }
+        .btn-github { color: #f0f6fc; }
+
+        .about-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+
+        .about-card h3 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .about-card p {
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="loader" class="loader-screen">
+            <div class="spinner"></div>
+            <p style="font-size: 13px; color: var(--text-secondary);">Verifying NFC Card...</p>
+        </div>
+
+        <div id="profile-content" class="hidden">
+            <div class="profile-header">
+                <div class="avatar-wrapper">
+                    <img id="user-avatar" src="https://via.placeholder.com/150" alt="Profile Photo" class="avatar-img">
+                    <div class="verified-badge"><i class="fa-solid fa-check"></i></div>
+                </div>
+                <h1 id="user-name" class="profile-name">--</h1>
+                <p id="user-profession" class="profile-profession">--</p>
+                <p id="user-bio" class="profile-bio">--</p>
+            </div>
+
+            <div class="action-group" id="links-container"></div>
+
+            <div id="about-section" class="about-card hidden">
+                <h3>About Us / Work</h3>
+                <p id="about-text"></p>
+            </div>
+
+            <div class="footer">
+                Powered by Smart NFC Digital Cards
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { db } from "./config.js";
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const cardId = urlParams.get('id');
+
+        async function processNFCScan() {
+            if (!cardId) {
+                window.location.href = "support.html?reason=no_id";
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "profiles", cardId);
+                const docSnap = await getDoc(docRef);
+
+                if (!docSnap.exists()) {
+                    window.location.href = "support.html?reason=invalid_card&id=" + cardId;
+                    return;
+                }
+
+                const data = docSnap.data();
+
+                if (data.status === "inactive") {
+                    window.location.href = `setup-form.html?id=${cardId}`;
+                    return;
+                }
+
+                if (data.status === "unverified" || data.status === "blocked") {
+                    window.location.href = `support.html?id=${cardId}&status=${data.status}`;
+                    return;
+                }
+
+                if (data.status === "active") {
+                    const redirectCfg = data.redirect_config;
+                    if (redirectCfg && redirectCfg.enable_auto_redirect) {
+                        const targetUrl = resolveTargetUrl(data, redirectCfg.target_type, redirectCfg.custom_url);
+                        if (targetUrl) {
+                            window.location.replace(targetUrl);
+                            return;
+                        }
+                    }
+
+                    renderProfile(data);
+                }
+
+            } catch (err) {
+                console.error("Firestore Fetch Error:", err);
+                window.location.href = "support.html?reason=network_error";
+            }
+        }
+
+        function resolveTargetUrl(data, targetType, customUrl) {
+            const links = data.links || {};
+            const social = links.social_media || {};
+
+            switch (targetType) {
+                case "google_review": return links.google_review;
+                case "website": return links.website;
+                case "instagram": return social.instagram;
+                case "linkedin": return social.linkedin;
+                case "whatsapp": return social.whatsapp ? `https://wa.me/${social.whatsapp.replace(/[^0-9]/g, '')}` : null;
+                case "custom_url": return customUrl;
+                default: return null;
+            }
+        }
+
+        function renderProfile(data) {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('profile-content').classList.remove('hidden');
+
+            const info = data.personal_info || {};
+            const links = data.links || {};
+            const social = links.social_media || {};
+
+            document.getElementById('user-avatar').src = info.profile_photo_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80';
+            document.getElementById('user-name').innerText = info.name || 'Anonymous User';
+            document.getElementById('user-profession').innerText = info.profession || 'Professional';
+            document.getElementById('user-bio').innerText = info.bio || '';
+
+            const linksContainer = document.getElementById('links-container');
+            linksContainer.innerHTML = '';
+
+            const linkButtons = [
+                { key: links.google_review, title: 'Leave Google Review', icon: 'fa-brands fa-google btn-google' },
+                { key: links.website, title: 'Visit Website', icon: 'fa-solid fa-globe btn-website' },
+                { key: social.whatsapp ? `https://wa.me/${social.whatsapp.replace(/[^0-9]/g, '')}` : null, title: 'WhatsApp Contact', icon: 'fa-brands fa-whatsapp btn-whatsapp' },
+                { key: social.instagram, title: 'Instagram Profile', icon: 'fa-brands fa-instagram btn-instagram' },
+                { key: social.linkedin, title: 'LinkedIn Profile', icon: 'fa-brands fa-linkedin-in btn-linkedin' },
+                { key: social.github, title: 'GitHub Portfolio', icon: 'fa-brands fa-github btn-github' }
+            ];
+
+            linkButtons.forEach(btn => {
+                if (btn.key) {
+                    const a = document.createElement('a');
+                    a.href = btn.key;
+                    a.target = '_blank';
+                    a.className = 'action-btn';
+                    a.innerHTML = `
+                        <div class="action-btn-left">
+                            <i class="${btn.icon}"></i>
+                            <span>${btn.title}</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="font-size: 12px; opacity: 0.5;"></i>
+                    `;
+                    linksContainer.appendChild(a);
+                }
+            });
+
+            if (data.work && data.work.about_us) {
+                document.getElementById('about-section').classList.remove('hidden');
+                document.getElementById('about-text').innerText = data.work.about_us;
+            }
+        }
+
+        //processNFCScan();
+    </script>
+</body>
+</html>
